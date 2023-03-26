@@ -1,9 +1,35 @@
+const config = require('config')
 const Joi = require('joi');
+const helmet = require('helmet')
+const morgan = require('morgan')
+const logger = require('./logger')
+const auth = require('./auth')
 const express  = require('express');
 const app = express();
 const PORT  = 3000
 
+//Configuration
+console.log("Application name: " + config.get('name'))
+console.log("Mail server: " + config.get('mail.host'))
+console.log("Mail Password: " + config.get('mail.password'))
+
+
+
+// console.log(`NODE_ENV: ${process.env.NODE_ENV}`)  
+// console.log(`app: ${app.get('env')}`)
+
 app.use(express.json())
+app.use(express.urlencoded({extended: true}))
+app.use(express.static('public'))
+app.use(helmet())
+//app.use(morgan('tiny')) // It will impact your request pipe line, don't use in production.
+
+if (app.get('env') === 'development'){
+    app.use(morgan('tiny'));
+    console.log("Morgan enabled")
+}
+app.use(logger)
+app.use(auth)
 
 const courses = [
     {id: 1, name: "Node.js from zero to hero"},
